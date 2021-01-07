@@ -14,24 +14,26 @@
 package svc
 
 import (
-	"fmt"
+	"sync"
 
 	"github.com/projects/bitmex/proto"
 )
 
 type hub struct {
-	connections map[*connection]bool
-	broadcast   chan proto.MsgSrv
-	register    chan *connection
-	unregister  chan *connection
+	connectionsMx sync.RWMutex
+	connections   map[*connection]bool
+	broadcast     chan proto.MsgSrv
+	register      chan *connection
+	unregister    chan *connection
 }
 
 func newHub() *hub {
 	h := &hub{
-		connections: make(map[*connection]bool),
-		broadcast:   make(chan proto.MsgSrv),
-		register:    make(chan *connection),
-		unregister:  make(chan *connection),
+		connectionsMx: sync.RWMutex{},
+		connections:   make(map[*connection]bool),
+		broadcast:     make(chan proto.MsgSrv),
+		register:      make(chan *connection),
+		unregister:    make(chan *connection),
 	}
 	go h.run()
 	return h
@@ -41,15 +43,11 @@ func (h *hub) run() {
 	for {
 		select {
 		case c := <-h.register:
-			h.connections[c] = true
-			fmt.Println("registered", c, h.connections)
+			h.addConnection(c)
 		case c := <-h.unregister:
-			if h.connections[c] {
-				delete(h.connections, c)
-				c.close()
-			}
-			fmt.Println("unregistered", c, h.connections)
+			h.removeConnection(c)
 		case m := <-h.broadcast:
+			h.connectionsMx.RLock()
 			for c := range h.connections {
 				if filter(m, *c) {
 					select {
@@ -60,14 +58,31 @@ func (h *hub) run() {
 					}
 				}
 			}
+			h.connectionsMx.RUnlock()
 		}
 	}
 }
 
+func (h *hub) addConnection(c *connection) {
+	h.connectionsMx.Lock()
+	defer h.connectionsMx.Unlock()
+	h.connections[c] = true
+}
+
+func (h *hub) removeConnection(c *connection) {
+	h.connectionsMx.Lock()
+	defer h.connectionsMx.Unlock()
+	if h.connections[c] {
+		delete(h.connections, c)
+		c.close()
+	}
+}
 func filter(m proto.MsgSrv, c connection) bool {
 	if len(c.symbols) == 0 {
 		return true
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	for i := range c.symbols {
 		if m.Symbol == c.symbols[i] {
 			return true
