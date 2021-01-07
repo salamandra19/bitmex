@@ -18,7 +18,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/powerman/structlog"
-	"github.com/projects/bitmex/proto"
+	"github.com/salamandra19/bitmex/proto"
 )
 
 var (
@@ -44,10 +44,12 @@ func (c *connection) close() {
 }
 
 func (c *connection) reader() {
+	defer c.ws.Close()
 	for {
 		var msg proto.MsgClientAction
 		err := c.ws.ReadJSON(&msg)
 		if err != nil {
+			log.Err("failed to read msg", "err", err)
 			break
 		}
 		switch msg.Action {
@@ -55,6 +57,13 @@ func (c *connection) reader() {
 			return
 		case "subscribe":
 			if len(msg.Symbols) == 0 {
+				switch {
+				case len(c.symbols) == 0:
+				case len(c.symbols) > 0:
+					c.mu.Lock()
+					c.symbols = (c.symbols[:0])
+					c.mu.Unlock()
+				}
 			} else {
 				c.mu.Lock()
 				for i := range msg.Symbols {
@@ -67,8 +76,6 @@ func (c *connection) reader() {
 			return
 		}
 	}
-
-	c.ws.Close()
 }
 
 func (c *connection) writer() {

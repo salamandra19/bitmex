@@ -1,4 +1,4 @@
-module github.com/projects/bitmex
+module github.com/salamandra19/bitmex
 
 go 1.15
 

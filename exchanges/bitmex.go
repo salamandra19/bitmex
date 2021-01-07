@@ -3,7 +3,7 @@ package exchanges
 import (
 	"github.com/gorilla/websocket"
 	"github.com/powerman/structlog"
-	"github.com/projects/bitmex/proto"
+	"github.com/salamandra19/bitmex/proto"
 )
 
 var (
@@ -11,13 +11,19 @@ var (
 )
 
 type MsgBitmex struct {
-	Table  string         `json:"table"`
-	Action string         `json:"action"`
-	Data   []proto.MsgSrv `json:"data"`
+	Table  string
+	Action string
+	Data   []MsgBitmexData
+}
+
+type MsgBitmexData struct {
+	Timestamp string  `json:"timestamp"`
+	Symbol    string  `json:"symbol"`
+	Price     float64 `json:"lastPrice"`
 }
 
 func NewBitmex(c chan proto.MsgSrv) {
-	go func(c chan proto.MsgSrv) {
+	go func() {
 		conn, _, err := websocket.DefaultDialer.Dial("wss://testnet.bitmex.com/realtime?subscribe=instrument", nil)
 		if err != nil {
 			log.Fatal("failed to dial", "err", err)
@@ -32,8 +38,16 @@ func NewBitmex(c chan proto.MsgSrv) {
 				return
 			}
 			for i := range msg.Data {
-				c <- msg.Data[i]
+				c <- convert(msg.Data[i])
 			}
 		}
-	}(c)
+	}()
+}
+
+func convert(data MsgBitmexData) proto.MsgSrv {
+	return proto.MsgSrv{
+		Timestamp: data.Timestamp,
+		Symbol:    data.Symbol,
+		Price:     data.Price,
+	}
 }

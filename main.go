@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/projects/bitmex/exchanges"
-	"github.com/projects/bitmex/proto"
-	"github.com/projects/bitmex/svc"
+	"github.com/salamandra19/bitmex/exchanges"
+	"github.com/salamandra19/bitmex/proto"
+	"github.com/salamandra19/bitmex/svc"
 )
 
 func main() {

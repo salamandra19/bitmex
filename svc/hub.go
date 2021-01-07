@@ -14,26 +14,22 @@
 package svc
 
 import (
-	"sync"
-
-	"github.com/projects/bitmex/proto"
+	"github.com/salamandra19/bitmex/proto"
 )
 
 type hub struct {
-	connectionsMx sync.RWMutex
-	connections   map[*connection]bool
-	broadcast     chan proto.MsgSrv
-	register      chan *connection
-	unregister    chan *connection
+	connections map[*connection]bool
+	broadcast   chan proto.MsgSrv
+	register    chan *connection
+	unregister  chan *connection
 }
 
 func newHub() *hub {
 	h := &hub{
-		connectionsMx: sync.RWMutex{},
-		connections:   make(map[*connection]bool),
-		broadcast:     make(chan proto.MsgSrv),
-		register:      make(chan *connection),
-		unregister:    make(chan *connection),
+		connections: make(map[*connection]bool),
+		broadcast:   make(chan proto.MsgSrv),
+		register:    make(chan *connection),
+		unregister:  make(chan *connection),
 	}
 	go h.run()
 	return h
@@ -43,13 +39,15 @@ func (h *hub) run() {
 	for {
 		select {
 		case c := <-h.register:
-			h.addConnection(c)
+			h.connections[c] = true
 		case c := <-h.unregister:
-			h.removeConnection(c)
+			if h.connections[c] {
+				delete(h.connections, c)
+				c.close()
+			}
 		case m := <-h.broadcast:
-			h.connectionsMx.RLock()
 			for c := range h.connections {
-				if filter(m, *c) {
+				if filter(m, c) {
 					select {
 					case c.send <- m:
 					default:
@@ -58,26 +56,11 @@ func (h *hub) run() {
 					}
 				}
 			}
-			h.connectionsMx.RUnlock()
 		}
 	}
 }
 
-func (h *hub) addConnection(c *connection) {
-	h.connectionsMx.Lock()
-	defer h.connectionsMx.Unlock()
-	h.connections[c] = true
-}
-
-func (h *hub) removeConnection(c *connection) {
-	h.connectionsMx.Lock()
-	defer h.connectionsMx.Unlock()
-	if h.connections[c] {
-		delete(h.connections, c)
-		c.close()
-	}
-}
-func filter(m proto.MsgSrv, c connection) bool {
+func filter(m proto.MsgSrv, c *connection) bool {
 	if len(c.symbols) == 0 {
 		return true
 	}

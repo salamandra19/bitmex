@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/projects/bitmex/proto"
+	"github.com/salamandra19/bitmex/proto"
 )
 
 type Server struct {
@@ -21,6 +21,7 @@ func NewServer(msgSrvChan chan proto.MsgSrv) *Server {
 		hub:        newHub(),
 		msgSrvChan: msgSrvChan,
 	}
+	go srv.sendingMsgSrv()
 	return srv
 }
 
@@ -34,7 +35,6 @@ func (srv *Server) Handler(w http.ResponseWriter, r *http.Request) {
 
 	srv.hub.register <- c
 	defer func() { srv.hub.unregister <- c }()
-	go srv.sendingMsgSrv()
 	go c.writer()
 	c.reader()
 }

@@ -19,8 +19,8 @@ type (
 	}
 
 	MsgSrv struct {
-		Timestamp string  `json:"timestamp"`
-		Symbol    string  `json:"symbol"`
-		Price     float64 `json:"lastPrice"`
+		Timestamp string
+		Symbol    string
+		Price     float64
 	}
 )
