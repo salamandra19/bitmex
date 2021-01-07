@@ -1,1 +1,16 @@
-# bitmex
+This is a modified version of github.com/gohugoio/hugo/livereload.
+
+Websocket API Gateway
+
+This application uses Gorilla websocket to implement a gateway for subscribing
+to the signals of the test account of the Bitmex exchange, when connected to which
+it is possible to receive notifications about changes in the table of financial
+instruments (quotes) of the test environment of the Bitmex exchange.
+
+You can run service by command
+run main.go
+
+Test as a client using websocat by command
+websocat ws://127.0.0.1:8844/bitmex
+
+
