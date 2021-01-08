@@ -1,9 +1,7 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"github.com/salamandra19/bitmex/exchanges"
 	"github.com/salamandra19/bitmex/proto"
 	"github.com/salamandra19/bitmex/svc"
@@ -15,6 +13,10 @@ func main() {
 	exchanges.NewBitmex(msgSrvChan)
 
 	server := svc.NewServer(msgSrvChan)
-	http.Handle("/bitmex", http.HandlerFunc(server.Handler))
-	log.Fatal(http.ListenAndServe(":8844", nil))
+
+	r := gin.Default()
+	r.GET("/bitmex", func(c *gin.Context) {
+		server.Handler(c.Writer, c.Request)
+	})
+	r.Run(":8844")
 }
