@@ -22,6 +22,10 @@ type MsgBitmexData struct {
 	Price     float64 `json:"lastPrice"`
 }
 
+// TODO must be reconnected with an exponential delay in case of connection error.
+// TODO make authentication if it is needed.
+
+// NewBitmex gets websocket connection to Bitmex and receives change massages.
 func NewBitmex(c chan proto.MsgSrv) {
 	go func() {
 		conn, _, err := websocket.DefaultDialer.Dial("wss://testnet.bitmex.com/realtime?subscribe=instrument", nil)
