@@ -66,8 +66,8 @@ func filter(m proto.MsgSrv, c *connection) bool {
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	for i := range c.symbols {
-		if m.Symbol == c.symbols[i] {
+	for range c.symbols {
+		if c.symbols[m.Symbol] {
 			return true
 		}
 	}

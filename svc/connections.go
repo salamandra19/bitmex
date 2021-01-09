@@ -28,14 +28,15 @@ var (
 type connection struct {
 	ws      *websocket.Conn
 	send    chan interface{}
-	symbols []string
+	symbols map[string]bool
 	mu      sync.Mutex
 }
 
 func newConnection(ws *websocket.Conn) *connection {
 	return &connection{
-		ws:   ws,
-		send: make(chan interface{}, 256),
+		ws:      ws,
+		send:    make(chan interface{}, 256),
+		symbols: make(map[string]bool),
 	}
 }
 
@@ -61,13 +62,13 @@ func (c *connection) reader() {
 				case len(c.symbols) == 0:
 				case len(c.symbols) > 0:
 					c.mu.Lock()
-					c.symbols = (c.symbols[:0])
+					c.symbols = make(map[string]bool)
 					c.mu.Unlock()
 				}
 			} else {
 				c.mu.Lock()
 				for i := range msg.Symbols {
-					c.symbols = append(c.symbols, msg.Symbols[i])
+					c.symbols[msg.Symbols[i]] = true
 				}
 				c.mu.Unlock()
 			}
