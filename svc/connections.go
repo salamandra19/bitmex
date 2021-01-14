@@ -50,7 +50,7 @@ func (c *connection) reader() {
 		var msg proto.MsgClientAction
 		err := c.ws.ReadJSON(&msg)
 		if err != nil {
-			log.Err("failed to read msg", "err", err)
+			log.PrintErr("failed to read msg", "err", err)
 			break
 		}
 		switch msg.Action {
@@ -73,7 +73,7 @@ func (c *connection) reader() {
 				c.mu.Unlock()
 			}
 		default:
-			log.Err("unsupported", "action", msg.Action)
+			log.PrintErr("unsupported", "action", msg.Action)
 			return
 		}
 	}

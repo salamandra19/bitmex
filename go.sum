@@ -40,6 +40,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/powerman/check v1.2.1 h1:x1io+fh3njxQEmbvONx5a9QWZXVwFP1BDPKNqK0uZAo=
 github.com/powerman/check v1.2.1/go.mod h1:IW+hYd9ihaKn7ri1+NGS8WWwrKdytbU8hgNC1wbcurc=
+github.com/powerman/must v0.1.0 h1:/Romq/snkUx7jU0RVxbaQWo8eoGV5LEFP7lMY2Paq7I=
+github.com/powerman/must v0.1.0/go.mod h1:agQ0zQd+ZBTI+I+KUL9G1l9ZPXTcjzOUfXvZUQpOVwo=
 github.com/powerman/structlog v0.7.1 h1:68xN/GdxU7SYbXu/7P4RWyK7lKaN7FXjncarf7wO+Wk=
 github.com/powerman/structlog v0.7.1/go.mod h1:ksFcAlZ6WcmwQScaECqbijO3pEAKiSVKmJo/Vtpw8aM=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d/go.mod h1:OnSkiWE9lh6wB0YB77sQom3nweQdgAjqCqsofrRNTgc=
