@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	var msgSrvChan = make(chan proto.MsgSrv)
-	exchanges.NewBitmex(msgSrvChan)
+	exchanges.ConnectBitmex(msgSrvChan)
 
 	server := svc.NewServer(msgSrvChan)
 
