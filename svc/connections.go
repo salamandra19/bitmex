@@ -26,10 +26,11 @@ var (
 )
 
 type connection struct {
-	ws      *websocket.Conn
-	send    chan interface{}
-	symbols map[string]bool
-	mu      sync.Mutex
+	ws        *websocket.Conn
+	send      chan interface{}
+	symbols   map[string]bool
+	mu        sync.Mutex
+	subscribe bool
 }
 
 func newConnection(ws *websocket.Conn) *connection {
@@ -57,6 +58,7 @@ func (c *connection) reader() {
 		case "unsubscribe":
 			return
 		case "subscribe":
+			c.subscribe = true
 			if len(msg.Symbols) == 0 {
 				switch {
 				case len(c.symbols) == 0:

@@ -40,6 +40,7 @@ func (h *hub) run() {
 		select {
 		case c := <-h.register:
 			h.connections[c] = true
+			c.send <- "You are connected"
 		case c := <-h.unregister:
 			if h.connections[c] {
 				delete(h.connections, c)
@@ -61,14 +62,16 @@ func (h *hub) run() {
 }
 
 func filter(m proto.MsgSrv, c *connection) bool {
-	if len(c.symbols) == 0 {
-		return true
-	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	for range c.symbols {
-		if c.symbols[m.Symbol] {
+	if c.subscribe {
+		if len(c.symbols) == 0 {
 			return true
+		}
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		for range c.symbols {
+			if c.symbols[m.Symbol] {
+				return true
+			}
 		}
 	}
 	return false
